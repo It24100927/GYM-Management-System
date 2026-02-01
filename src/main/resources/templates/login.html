@@ -1,0 +1,300 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="description" content="Gym Template">
+    <meta name="keywords" content="Gym, unica, creative, html">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta http-equiv="X-UA-Compatible" content="ie=edge">
+    <title>Login - Gym Management System</title>
+
+    <!-- Google Font -->
+    <link href="https://fonts.googleapis.com/css?family=Muli:300,400,500,600,700,800,900&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css?family=Oswald:300,400,500,600,700&display=swap" rel="stylesheet">
+
+    <!-- Css Styles -->
+    <link rel="stylesheet" th:href="@{/css/bootstrap.min.css}" type="text/css">
+    <link rel="stylesheet" th:href="@{/css/font-awesome.min.css}" type="text/css">
+    <link rel="stylesheet" th:href="@{/css/flaticon.css}" type="text/css">
+    <link rel="stylesheet" th:href="@{/css/owl.carousel.min.css}" type="text/css">
+    <link rel="stylesheet" th:href="@{/css/barfiller.css}" type="text/css">
+    <link rel="stylesheet" th:href="@{/css/magnific-popup.css}" type="text/css">
+    <link rel="stylesheet" th:href="@{/css/slicknav.min.css}" type="text/css">
+    <link rel="stylesheet" th:href="@{/css/style.css}" type="text/css">
+    <link rel="stylesheet" th:href="@{/css/login.css}" type="text/css">
+</head>
+
+<body>
+    <!-- Page Preloder -->
+    <div id="preloder">
+        <div class="loader"></div>
+    </div>
+
+    <!-- Offcanvas Menu Section Begin -->
+    <div class="offcanvas-menu-overlay"></div>
+    <div class="offcanvas-menu-wrapper">
+        <div class="canvas-close">
+            <i class="fa fa-close"></i>
+        </div>
+        <div class="canvas-search search-switch">
+            <i class="fa fa-search"></i>
+        </div>
+        <nav class="canvas-menu mobile-menu">
+            <ul>
+                <li><a th:href="@{/index.html}">Home</a></li>
+                <li><a th:href="@{/about-us.html}">About Us</a></li>
+                <li><a th:href="@{/class-details.html}">Classes</a></li>
+                <li><a th:href="@{/services.html}">Services</a></li>
+                <li><a th:href="@{/team.html}">Our Team</a></li>
+                <li><a href="#">Pages</a>
+                    <ul class="dropdown">
+                        <li><a th:href="@{/about-us.html}">About us</a></li>
+                        <li><a th:href="@{/class-timetable.html}">Classes timetable</a></li>
+                        <li><a th:href="@{/bmi-calculator.html}">Bmi calculate</a></li>
+                        <li><a th:href="@{/team.html}">Our team</a></li>
+                        <li><a th:href="@{/gallery.html}">Gallery</a></li>
+                        <li><a th:href="@{/blog.html}">Our blog</a></li>
+                        <li><a th:href="@{/404.html}">404</a></li>
+                    </ul>
+                </li>
+                <li><a th:href="@{/contact.html}">Contact</a></li>
+                <li class="active"><a th:href="@{/login}" class="primary-btn">Login</a></li>
+            </ul>
+        </nav>
+        <div id="mobile-menu-wrap"></div>
+        <div class="canvas-social">
+            <a href="#"><i class="fa fa-facebook"></i></a>
+            <a href="#"><i class="fa fa-twitter"></i></a>
+            <a href="#"><i class="fa fa-youtube-play"></i></a>
+            <a href="#"><i class="fa fa-instagram"></i></a>
+        </div>
+    </div>
+    <!-- Offcanvas Menu Section End -->
+
+    <!-- Header Section Begin -->
+    <header class="header-section">
+        <div class="container-fluid">
+            <div class="row">
+                <div class="col-lg-3">
+                    <div class="logo">
+                        <a th:href="@{/index.html}">
+                            <img th:src="@{/img/logo.png}" alt="">
+                        </a>
+                    </div>
+                </div>
+                <div class="col-lg-6">
+                    <nav class="nav-menu">
+                        <ul>
+                            <li><a th:href="@{/index.html}">Home</a></li>
+                            <li><a th:href="@{/about-us.html}">About Us</a></li>
+                            <li><a th:href="@{/class-details.html}">Classes</a></li>
+                            <li><a th:href="@{/services.html}">Services</a></li>
+                            <li><a th:href="@{/team.html}">Our Team</a></li>
+                            <li><a href="#">Pages</a>
+                                <ul class="dropdown">
+                                    <li><a th:href="@{/about-us.html}">About us</a></li>
+                                    <li><a th:href="@{/class-timetable.html}">Classes timetable</a></li>
+                                    <li><a th:href="@{/bmi-calculator.html}">Bmi calculate</a></li>
+                                    <li><a th:href="@{/team.html}">Our team</a></li>
+                                    <li><a th:href="@{/gallery.html}">Gallery</a></li>
+                                    <li><a th:href="@{/blog.html}">Our blog</a></li>
+                                    <li><a th:href="@{/404.html}">404</a></li>
+                                </ul>
+                            </li>
+                            <li><a th:href="@{/contact.html}">Contact</a></li>
+                            <li class="active"><a th:href="@{/login}" class="primary-btn">Login</a></li>
+                        </ul>
+                    </nav>
+                </div>
+                <div class="col-lg-3">
+                    <div class="top-option">
+                        <div class="to-search search-switch">
+                            <i class="fa fa-search"></i>
+                        </div>
+                        <div class="to-social">
+                            <a href="#"><i class="fa fa-facebook"></i></a>
+                            <a href="#"><i class="fa fa-twitter"></i></a>
+                            <a href="#"><i class="fa fa-youtube-play"></i></a>
+                            <a href="#"><i class="fa fa-instagram"></i></a>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="canvas-open">
+                <i class="fa fa-bars"></i>
+            </div>
+        </div>
+    </header>
+    <!-- Header End -->
+
+    <!-- Login Section Begin -->
+    <section class="login-section">
+        <div class="container">
+            <div class="row">
+                <div class="col-lg-12">
+                    <div class="login-container">
+                        <div class="login-header">
+                            <h2>WELCOME BACK</h2>
+                            <span>Login to your account</span>
+                        </div>
+
+                        <!-- Success Message -->
+                        <div th:if="${param.success}" class="alert alert-success alert-dismissible fade show" role="alert">
+                            <i class="fa fa-check-circle"></i> Registration successful! Please login with your credentials.
+                            <button type="button" class="close" data-dismiss="alert" aria-label="Close">
+                                <span aria-hidden="true">&times;</span>
+                            </button>
+                        </div>
+
+                        <!-- Error Message -->
+                        <div th:if="${param.error}" class="alert alert-danger alert-dismissible fade show" role="alert">
+                            <i class="fa fa-exclamation-circle"></i> Invalid email or password. Please try again.
+                            <button type="button" class="close" data-dismiss="alert" aria-label="Close">
+                                <span aria-hidden="true">&times;</span>
+                            </button>
+                        </div>
+
+                        <!-- Logout Message -->
+                        <div th:if="${param.logout}" class="alert alert-info alert-dismissible fade show" role="alert">
+                            <i class="fa fa-info-circle"></i> You have been successfully logged out.
+                            <button type="button" class="close" data-dismiss="alert" aria-label="Close">
+                                <span aria-hidden="true">&times;</span>
+                            </button>
+                        </div>
+
+                        <div class="login-form-wrapper">
+                            <form th:action="@{/login}" method="post" class="login-form" id="loginForm">
+                                <div class="form-group">
+                                    <label for="username">Email Address</label>
+                                    <input type="email" id="username" name="username" placeholder="Enter your email" required>
+                                    <i class="fa fa-user input-icon"></i>
+                                </div>
+
+                                <div class="form-group">
+                                    <label for="password">Password</label>
+                                    <input type="password" id="password" name="password" placeholder="Enter your password" required>
+                                    <i class="fa fa-lock input-icon"></i>
+                                </div>
+
+                                <div class="form-options">
+                                    <div class="remember-me">
+                                        <input type="checkbox" id="remember-me" name="remember-me">
+                                        <label for="remember-me">Remember me</label>
+                                    </div>
+                                    <a href="#" class="forgot-password">Forgot Password?</a>
+                                </div>
+
+                                <button type="submit" class="login-btn">Login</button>
+
+                                <div class="login-divider">
+                                    <span>OR</span>
+                                </div>
+
+                                <div class="register-link">
+                                    <p>Don't have an account? <a th:href="@{/register}">Register Now</a></p>
+                                </div>
+                            </form>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+    <!-- Login Section End -->
+
+    <!-- Footer Section Begin -->
+    <section class="footer-section">
+        <div class="container">
+            <div class="row">
+                <div class="col-lg-4">
+                    <div class="fs-about">
+                        <div class="fa-logo">
+                            <a href="#"><img th:src="@{/img/logo.png}" alt=""></a>
+                        </div>
+                        <p>Transform your body, transform your life. Join our community and achieve your fitness goals with expert trainers and state-of-the-art facilities.</p>
+                        <div class="fa-social">
+                            <a href="#"><i class="fa fa-facebook"></i></a>
+                            <a href="#"><i class="fa fa-twitter"></i></a>
+                            <a href="#"><i class="fa fa-youtube-play"></i></a>
+                            <a href="#"><i class="fa fa-instagram"></i></a>
+                            <a href="#"><i class="fa  fa-envelope-o"></i></a>
+                        </div>
+                    </div>
+                </div>
+                <div class="col-lg-2 col-md-3 col-sm-6">
+                    <div class="fs-widget">
+                        <h4>Useful links</h4>
+                        <ul>
+                            <li><a th:href="@{/about-us.html}">About</a></li>
+                            <li><a th:href="@{/blog.html}">Blog</a></li>
+                            <li><a th:href="@{/class-details.html}">Classes</a></li>
+                            <li><a th:href="@{/contact.html}">Contact</a></li>
+                        </ul>
+                    </div>
+                </div>
+                <div class="col-lg-2 col-md-3 col-sm-6">
+                    <div class="fs-widget">
+                        <h4>Support</h4>
+                        <ul>
+                            <li><a th:href="@{/login}">Login</a></li>
+                            <li><a th:href="@{/register}">Register</a></li>
+                            <li><a th:href="@{/services.html}">Services</a></li>
+                            <li><a th:href="@{/contact.html}">Contact</a></li>
+                        </ul>
+                    </div>
+                </div>
+                <div class="col-lg-4 col-md-6">
+                    <div class="fs-widget">
+                        <h4>Tips & Guides</h4>
+                        <div class="fw-recent">
+                            <h6><a href="#">Physical fitness may help prevent depression, anxiety</a></h6>
+                            <ul>
+                                <li>3 min read</li>
+                                <li>20 Comment</li>
+                            </ul>
+                        </div>
+                        <div class="fw-recent">
+                            <h6><a href="#">Fitness: The best exercise to lose belly fat and tone up...</a></h6>
+                            <ul>
+                                <li>3 min read</li>
+                                <li>20 Comment</li>
+                            </ul>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="row">
+                <div class="col-lg-12 text-center">
+                    <div class="copyright-text">
+                        <p>Copyright &copy;<script>document.write(new Date().getFullYear());</script> All rights reserved | Gym Management System</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+    <!-- Footer Section End -->
+
+    <!-- Search model Begin -->
+    <div class="search-model">
+        <div class="h-100 d-flex align-items-center justify-content-center">
+            <div class="search-close-switch">+</div>
+            <form class="search-model-form">
+                <input type="text" id="search-input" placeholder="Search here.....">
+            </form>
+        </div>
+    </div>
+    <!-- Search model end -->
+
+    <!-- Js Plugins -->
+    <script th:src="@{/js/jquery-3.3.1.min.js}"></script>
+    <script th:src="@{/js/bootstrap.min.js}"></script>
+    <script th:src="@{/js/jquery.magnific-popup.min.js}"></script>
+    <script th:src="@{/js/masonry.pkgd.min.js}"></script>
+    <script th:src="@{/js/jquery.barfiller.js}"></script>
+    <script th:src="@{/js/jquery.slicknav.js}"></script>
+    <script th:src="@{/js/owl.carousel.min.js}"></script>
+    <script th:src="@{/js/main.js}"></script>
+</body>
+
+</html>

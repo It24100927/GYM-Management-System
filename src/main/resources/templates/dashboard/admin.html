@@ -1,0 +1,131 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org"
+      xmlns:sec="http://www.thymeleaf.org/extras/spring-security">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Admin Dashboard - Gym Management System</title>
+    <link rel="stylesheet" th:href="@{/css/bootstrap.min.css}">
+    <link rel="stylesheet" th:href="@{/css/font-awesome.min.css}">
+    <link rel="stylesheet" th:href="@{/css/style.css}">
+    <style>
+        .dashboard-container {
+            min-height: 100vh;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            padding: 50px 0;
+        }
+        .dashboard-card {
+            background: white;
+            border-radius: 15px;
+            padding: 40px;
+            box-shadow: 0 10px 40px rgba(0,0,0,0.1);
+            margin-bottom: 30px;
+        }
+        .welcome-header {
+            color: white;
+            text-align: center;
+            margin-bottom: 40px;
+        }
+        .stats-card {
+            background: linear-gradient(135deg, #f093fb 0%, #f5576c 100%);
+            color: white;
+            padding: 30px;
+            border-radius: 10px;
+            margin-bottom: 20px;
+            text-align: center;
+        }
+        .stats-card h3 {
+            font-size: 48px;
+            margin: 10px 0;
+        }
+        .stats-card p {
+            margin: 0;
+            font-size: 18px;
+        }
+        .action-btn {
+            background: #667eea;
+            color: white;
+            padding: 15px 30px;
+            border-radius: 5px;
+            text-decoration: none;
+            display: inline-block;
+            margin: 10px;
+            transition: all 0.3s;
+        }
+        .action-btn:hover {
+            background: #764ba2;
+            transform: translateY(-2px);
+            color: white;
+        }
+    </style>
+</head>
+<body>
+    <div class="dashboard-container">
+        <div class="container">
+            <div class="welcome-header">
+                <h1>🎯 Admin Dashboard</h1>
+                <p>Welcome back, <span th:text="${username}">Admin</span>!</p>
+            </div>
+
+            <div class="row">
+                <div class="col-md-12">
+                    <div class="dashboard-card">
+                        <h2>📊 System Overview</h2>
+                        <div class="row mt-4">
+                            <div class="col-md-4">
+                                <div class="stats-card">
+                                    <i class="fa fa-users fa-2x"></i>
+                                    <h3>0</h3>
+                                    <p>Total Members</p>
+                                </div>
+                            </div>
+                            <div class="col-md-4">
+                                <div class="stats-card" style="background: linear-gradient(135deg, #4facfe 0%, #00f2fe 100%);">
+                                    <i class="fa fa-credit-card fa-2x"></i>
+                                    <h3>0</h3>
+                                    <p>Active Subscriptions</p>
+                                </div>
+                            </div>
+                            <div class="col-md-4">
+                                <div class="stats-card" style="background: linear-gradient(135deg, #43e97b 0%, #38f9d7 100%);">
+                                    <i class="fa fa-dollar fa-2x"></i>
+                                    <h3>$0</h3>
+                                    <p>Monthly Revenue</p>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="row">
+                <div class="col-md-12">
+                    <div class="dashboard-card">
+                        <h2>⚡ Quick Actions</h2>
+                        <div class="mt-4 text-center">
+                            <a href="#" class="action-btn"><i class="fa fa-user-plus"></i> Add New Member</a>
+                            <a href="#" class="action-btn"><i class="fa fa-list"></i> View All Members</a>
+                            <a href="#" class="action-btn"><i class="fa fa-dumbbell"></i> Manage Plans</a>
+                            <a href="#" class="action-btn"><i class="fa fa-calendar"></i> Schedule Classes</a>
+                            <a href="#" class="action-btn"><i class="fa fa-chart-bar"></i> View Reports</a>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="row">
+                <div class="col-md-12 text-center">
+                    <form th:action="@{/logout}" method="post" style="display: inline;">
+                        <button type="submit" class="action-btn" style="background: #f5576c;">
+                            <i class="fa fa-sign-out"></i> Logout
+                        </button>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script th:src="@{/js/jquery-3.3.1.min.js}"></script>
+    <script th:src="@{/js/bootstrap.min.js}"></script>
+</body>
+</html>
