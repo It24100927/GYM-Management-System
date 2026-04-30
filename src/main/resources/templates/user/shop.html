@@ -1,0 +1,704 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Gym Shop - Gym Management System</title>
+    <th:block th:replace="fragments/dashboard :: css"></th:block>
+    <style>
+        .shop-header {
+            background: linear-gradient(135deg, #f4511e 0%, #ff7043 100%);
+            border-radius: 15px;
+            padding: 30px;
+            margin-bottom: 30px;
+            color: white;
+        }
+        .shop-header h1 { margin: 0; font-size: 32px; }
+        .shop-header p { margin: 10px 0 0; opacity: 0.9; }
+
+        .category-filter {
+            display: flex;
+            gap: 15px;
+            margin-bottom: 25px;
+            flex-wrap: wrap;
+        }
+        .category-btn {
+            padding: 10px 25px;
+            background: var(--card-bg);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            border-radius: 25px;
+            color: var(--text-muted);
+            cursor: pointer;
+            transition: all 0.3s ease;
+            font-size: 14px;
+        }
+        .category-btn:hover { background: rgba(244, 81, 30, 0.1); border-color: #f4511e; }
+        .category-btn.active {
+            background: #f4511e;
+            color: white;
+            border-color: #f4511e;
+        }
+
+        .product-card {
+            background: var(--card-bg);
+            border-radius: 15px;
+            overflow: hidden;
+            margin-bottom: 25px;
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            transition: transform 0.3s ease, box-shadow 0.3s ease;
+        }
+        .product-card:hover {
+            transform: translateY(-8px);
+            box-shadow: 0 15px 40px rgba(244, 81, 30, 0.15);
+        }
+        .product-image {
+            height: 180px;
+            background: linear-gradient(135deg, #2a2a3e 0%, #1a1a2e 100%);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 64px;
+            position: relative;
+            overflow: hidden;
+        }
+        .product-image img {
+            width: 100%;
+            height: 100%;
+            object-fit: contain;
+            padding: 10px;
+        }
+        .product-image .featured-badge {
+            position: absolute;
+            top: 10px;
+            right: 10px;
+            background: #ffc107;
+            color: #000;
+            padding: 4px 10px;
+            border-radius: 15px;
+            font-size: 11px;
+            font-weight: 600;
+        }
+        .product-image .out-of-stock-badge {
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: rgba(0, 0, 0, 0.7);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: #f44336;
+            font-weight: 700;
+            font-size: 18px;
+        }
+        .product-body { padding: 20px; }
+        .product-category {
+            display: inline-block;
+            padding: 4px 12px;
+            border-radius: 15px;
+            font-size: 11px;
+            font-weight: 500;
+            margin-bottom: 10px;
+        }
+        .product-category.supplement { background: rgba(156, 39, 176, 0.2); color: #9c27b0; }
+        .product-category.merchandise { background: rgba(33, 150, 243, 0.2); color: #2196f3; }
+        .product-category.equipment { background: rgba(255, 152, 0, 0.2); color: #ff9800; }
+        .product-category.supplies { background: rgba(0, 150, 136, 0.2); color: #009688; }
+
+        .product-name { font-size: 18px; font-weight: 600; margin-bottom: 5px; }
+        .product-brand { color: var(--text-muted); font-size: 13px; margin-bottom: 10px; }
+        .product-description { color: var(--text-muted); font-size: 13px; margin-bottom: 15px; line-height: 1.5; }
+        .product-price { font-size: 24px; font-weight: 700; color: #f4511e; }
+        .product-stock { font-size: 13px; color: var(--text-muted); }
+        .product-stock.low { color: #ffc107; }
+
+        .buy-section {
+            display: flex;
+            gap: 10px;
+            margin-top: 15px;
+            align-items: center;
+        }
+        .qty-input {
+            width: 70px;
+            text-align: center;
+            background: rgba(255, 255, 255, 0.05);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            border-radius: 8px;
+            padding: 8px;
+            color: white;
+        }
+        .buy-btn {
+            flex: 1;
+            background: #f4511e;
+            color: white;
+            border: none;
+            padding: 10px 20px;
+            border-radius: 8px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+        .buy-btn:hover { background: #e64a19; }
+        .buy-btn:disabled {
+            background: #555;
+            cursor: not-allowed;
+        }
+
+        .cart-summary {
+            background: var(--card-bg);
+            border-radius: 15px;
+            padding: 25px;
+            position: sticky;
+            top: 20px;
+            border: 1px solid rgba(255, 255, 255, 0.1);
+        }
+        .cart-summary h3 { margin-bottom: 20px; }
+
+        .search-box {
+            background: var(--card-bg);
+            border-radius: 10px;
+            padding: 5px;
+            margin-bottom: 25px;
+        }
+        .search-box input {
+            background: transparent;
+            border: none;
+            color: white;
+            padding: 10px 15px;
+            width: 100%;
+        }
+        .search-box input:focus { outline: none; }
+
+        .empty-state {
+            text-align: center;
+            padding: 50px;
+            color: var(--text-muted);
+        }
+        .empty-state i { font-size: 64px; margin-bottom: 20px; opacity: 0.5; }
+    </style>
+</head>
+
+<body>
+    <div id="loading-overlay">
+        <div style="text-align: center;">
+            <div class="loading-spinner"></div>
+            <div class="loading-text" style="color: white; margin-top: 15px;">Loading Shop...</div>
+        </div>
+    </div>
+
+    <div class="dashboard-wrapper">
+        <nav th:replace="fragments/dashboard :: sidebar-user(activePage='shop')"></nav>
+
+        <div class="main-content">
+            <div class="container-fluid">
+                <div th:replace="fragments/dashboard :: header(title='Gym Shop')"></div>
+
+                <!-- Shop Header -->
+                <div class="shop-header">
+                    <h1>🛒 Gym Shop</h1>
+                    <p>Premium supplements, merchandise, and equipment for your fitness journey</p>
+                </div>
+
+                <div class="row">
+                    <!-- Main Content -->
+                    <div class="col-lg-9">
+                        <!-- Search Box -->
+                        <div class="search-box">
+                            <input type="text" id="search-input" placeholder="🔍 Search products...">
+                        </div>
+
+                        <!-- Category Filter -->
+                        <div class="category-filter">
+                            <div class="category-btn active" data-category="all">All Products</div>
+                            <div class="category-btn" data-category="SUPPLEMENT">💊 Supplements</div>
+                            <div class="category-btn" data-category="MERCHANDISE">👕 Merchandise</div>
+                            <div class="category-btn" data-category="EQUIPMENT">🏋️ Equipment</div>
+                            <div class="category-btn" data-category="SUPPLIES">📦 Supplies</div>
+                        </div>
+
+                        <!-- Products Grid -->
+                        <div id="products-container" class="row">
+                            <div class="col-12 text-center">
+                                <p class="text-muted">Loading products...</p>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Sidebar -->
+                    <div class="col-lg-3">
+                        <div class="cart-summary">
+                            <h3>📋 My Recent Orders</h3>
+                            <div id="recent-orders">
+                                <p class="text-muted">Loading...</p>
+                            </div>
+                            <a href="/user/orders" class="btn btn-primary-custom btn-block mt-3">
+                                View All Orders
+                            </a>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Purchase Confirmation Modal -->
+    <div class="modal fade" id="purchaseModal" tabindex="-1" aria-hidden="true">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title">Confirm Purchase</h5>
+                    <button type="button" class="close" data-dismiss="modal"><span>&times;</span></button>
+                </div>
+                <div class="modal-body">
+                    <div id="purchase-details">
+                        <p><strong>Product:</strong> <span id="confirm-product"></span></p>
+                        <p><strong>Quantity:</strong> <span id="confirm-qty"></span></p>
+                        <p><strong>Unit Price:</strong> $<span id="confirm-price"></span></p>
+                        <hr>
+                        <p class="h4"><strong>Total:</strong> $<span id="confirm-total"></span></p>
+                    </div>
+                    <div class="form-group mt-3">
+                        <label>Payment Method</label>
+                        <select id="payment-method" class="form-control" onchange="togglePaymentInputs()">
+                            <option value="CASH">Cash (Pay at Counter)</option>
+                            <option value="CARD">Card</option>
+                            <option value="BANK_TRANSFER">Bank Transfer</option>
+                            <option value="ONLINE">Online Payment Portal</option>
+                        </select>
+                    </div>
+                    <div class="alert alert-secondary mt-2 mb-3" id="bank-details-info" style="display: none; background: rgba(255,255,255,0.05); border: 1px solid rgba(255,255,255,0.1); color: var(--text-color);">
+                        <strong><i class="fa fa-university"></i> Bank Details for Transfer/Deposit:</strong><br>
+                        <small>
+                            Bank: <strong>GYM Fitness Bank</strong><br>
+                            Account Name: <strong>GYM Management System</strong><br>
+                            Account No: <strong>1234 5678 9000</strong><br>
+                            Branch: <strong>Main Branch</strong>
+                        </small>
+                    </div>
+                    <div class="form-group" id="slip-upload-group">
+                        <label>Upload Payment Slip (PDF/JPG/PNG/WEBP, max 5MB)</label>
+                        <input type="file" id="payment-slip" class="form-control" accept=".pdf,image/jpeg,image/png,image/webp">
+                    </div>
+                    <div id="online-portal-group" style="display:none;">
+                        <div class="form-group">
+                            <label>Card Holder Name</label>
+                            <input id="portal-card-holder" class="form-control" maxlength="120" placeholder="Name on card">
+                        </div>
+                        <div class="form-group">
+                            <label>Card Number</label>
+                            <input id="portal-card-number" class="form-control" maxlength="23" placeholder="4111 1111 1111 1111">
+                        </div>
+                        <div class="row">
+                            <div class="col-md-4">
+                                <div class="form-group">
+                                    <label>Exp. Month</label>
+                                    <input id="portal-exp-month" type="number" min="1" max="12" class="form-control">
+                                </div>
+                            </div>
+                            <div class="col-md-4">
+                                <div class="form-group">
+                                    <label>Exp. Year</label>
+                                    <input id="portal-exp-year" type="number" min="2024" max="2100" class="form-control">
+                                </div>
+                            </div>
+                            <div class="col-md-4">
+                                <div class="form-group">
+                                    <label>CVV</label>
+                                    <input id="portal-cvv" type="password" maxlength="4" class="form-control">
+                                </div>
+                            </div>
+                        </div>
+                        <div class="form-group">
+                            <label>Billing Email</label>
+                            <input id="portal-billing-email" type="email" class="form-control" maxlength="120" placeholder="you@example.com">
+                        </div>
+                        <div class="form-check mb-2">
+                            <input id="portal-accepted-terms" class="form-check-input" type="checkbox">
+                            <label for="portal-accepted-terms" class="form-check-label">I confirm this payment is authorized and agree to terms.</label>
+                        </div>
+                    </div>
+                    <div class="form-group">
+                        <label>Notes (Optional)</label>
+                        <textarea id="purchase-notes" class="form-control" rows="2" placeholder="Any special requests..."></textarea>
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-dismiss="modal">Cancel</button>
+                    <button type="button" id="confirm-purchase-btn" class="btn btn-primary-custom">
+                        ✅ Confirm Purchase
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <th:block th:replace="fragments/dashboard :: scripts"></th:block>
+    <script>
+        let allProducts = [];
+        let currentCategory = 'all';
+        let pendingPurchase = null;
+        const DEFAULT_MAX_PURCHASE_LIMIT = 100;
+
+        document.addEventListener('DOMContentLoaded', function() {
+            loadProducts();
+            loadRecentOrders();
+            setupEventListeners();
+            document.getElementById('loading-overlay').style.display = 'none';
+        });
+
+        async function loadProducts() {
+            try {
+                const response = await fetch('/api/user/shop/products');
+                const result = await response.json();
+                if (result.status === 200) {
+                    allProducts = (result.data || []).map(product => ({
+                        ...product,
+                        maxPurchasePerUser: getEffectiveMaxPurchaseLimit(product)
+                    }));
+                     renderProducts();
+                 }
+            } catch (error) {
+                console.error('Error loading products:', error);
+                showError('Error loading products');
+            }
+        }
+
+        async function loadRecentOrders() {
+            try {
+                const response = await fetch('/api/user/shop/purchases');
+                const result = await response.json();
+                if (result.status === 200) {
+                    renderRecentOrders(result.data?.slice(0, 5) || []);
+                }
+            } catch (error) {
+                console.error('Error loading orders:', error);
+            }
+        }
+
+        function renderProducts() {
+            const container = document.getElementById('products-container');
+            let filtered = allProducts;
+
+            // Filter by category
+            if (currentCategory !== 'all') {
+                filtered = filtered.filter(p => p.category === currentCategory);
+            }
+
+            // Filter by search
+            const searchTerm = document.getElementById('search-input').value.toLowerCase();
+            if (searchTerm) {
+                filtered = filtered.filter(p =>
+                    p.name.toLowerCase().includes(searchTerm) ||
+                    p.description?.toLowerCase().includes(searchTerm) ||
+                    p.brand?.toLowerCase().includes(searchTerm)
+                );
+            }
+
+            if (filtered.length === 0) {
+                container.innerHTML = `
+                    <div class="col-12 empty-state">
+                        <i class="fa fa-box-open"></i>
+                        <p>No products found</p>
+                    </div>
+                `;
+                return;
+            }
+
+            container.innerHTML = filtered.map(product => `
+                <div class="col-md-4 col-sm-6">
+                    <div class="product-card">
+                        <div class="product-image">
+                            ${product.imageUrl ? `<img src="${product.imageUrl}" alt="${product.name}" onerror="this.outerHTML='${getCategoryIcon(product.category)}'">` : getCategoryIcon(product.category)}
+                            ${product.isFeatured ? '<span class="featured-badge">⭐ Featured</span>' : ''}
+                            ${product.stockQuantity <= 0 ? '<div class="out-of-stock-badge">OUT OF STOCK</div>' : ''}
+                        </div>
+                        <div class="product-body">
+                            <span class="product-category ${product.category.toLowerCase()}">${product.category}</span>
+                            <h5 class="product-name">${product.name}</h5>
+                            ${product.brand ? `<p class="product-brand">${product.brand}</p>` : ''}
+                            ${product.description ? `<p class="product-description">${truncate(product.description, 80)}</p>` : ''}
+                            <div class="d-flex justify-content-between align-items-center">
+                                <span class="product-price">$${product.price.toFixed(2)}</span>
+                                <span class="product-stock ${product.stockQuantity <= product.lowStockThreshold ? 'low' : ''}">
+                                    ${product.stockQuantity > 0 ? `${product.stockQuantity} left` : 'Out of Stock'}
+                                </span>
+                            </div>
+                            ${product.stockQuantity > 0 ? `
+                                <div class="buy-section">
+                                    <input type="number" class="qty-input" id="qty-${product.id}"
+                                           value="1" min="1" max="${Math.min(product.stockQuantity, getEffectiveMaxPurchaseLimit(product))}">
+                                    <button class="buy-btn" onclick="initPurchase(${product.id})">
+                                        Buy Now
+                                    </button>
+                                </div>
+                            ` : `
+                                <button class="buy-btn mt-3" disabled style="width: 100%;">
+                                    Out of Stock
+                                </button>
+                            `}
+                        </div>
+                    </div>
+                </div>
+            `).join('');
+        }
+
+        function renderRecentOrders(orders) {
+            const container = document.getElementById('recent-orders');
+
+            if (orders.length === 0) {
+                container.innerHTML = '<p class="text-muted">No orders yet</p>';
+                return;
+            }
+
+            container.innerHTML = orders.map(order => `
+                <div style="padding: 10px 0; border-bottom: 1px solid rgba(255,255,255,0.1);">
+                    <div class="d-flex justify-content-between">
+                        <span>${order.itemName}</span>
+                        <span>x${order.quantity}</span>
+                    </div>
+                    <div class="d-flex justify-content-between">
+                        <small class="text-muted">${formatDate(order.purchaseDate)}</small>
+                        <small class="status-${order.fulfillmentStatus.toLowerCase()}">${order.fulfillmentStatus}</small>
+                    </div>
+                </div>
+            `).join('');
+        }
+
+        function getCategoryIcon(category) {
+            const icons = {
+                'SUPPLEMENT': '💊',
+                'MERCHANDISE': '👕',
+                'EQUIPMENT': '🏋️',
+                'SUPPLIES': '📦'
+            };
+            return icons[category] || '📦';
+        }
+
+        function initPurchase(productId) {
+            const product = allProducts.find(p => p.id === productId);
+            if (!product) return;
+
+            const qty = parseInt(document.getElementById(`qty-${productId}`).value) || 1;
+
+            if (qty > product.stockQuantity) {
+                showToast('Quantity exceeds available stock', 'error');
+                return;
+            }
+
+            const maxAllowed = getEffectiveMaxPurchaseLimit(product);
+            if (qty > maxAllowed) {
+                showToast(`Maximum ${maxAllowed} per purchase`, 'error');
+                return;
+            }
+
+            pendingPurchase = { product, quantity: qty };
+
+            document.getElementById('confirm-product').textContent = product.name;
+            document.getElementById('confirm-qty').textContent = qty;
+            document.getElementById('confirm-price').textContent = product.price.toFixed(2);
+            document.getElementById('confirm-total').textContent = (product.price * qty).toFixed(2);
+            document.getElementById('payment-method').value = 'CASH';
+            document.getElementById('payment-slip').value = '';
+            togglePaymentInputs();
+
+            $('#purchaseModal').modal('show');
+        }
+
+        function paymentMethodRequiresSlip(method) {
+            return method === 'CARD' || method === 'BANK_TRANSFER';
+        }
+
+        function getEffectiveMaxPurchaseLimit(product) {
+            const parsed = Number(product?.maxPurchasePerUser);
+            if (!Number.isFinite(parsed) || parsed < 1) {
+                return DEFAULT_MAX_PURCHASE_LIMIT;
+            }
+            return Math.max(parsed, DEFAULT_MAX_PURCHASE_LIMIT);
+        }
+
+        async function confirmPurchase() {
+            if (!pendingPurchase) return;
+
+            const { product, quantity } = pendingPurchase;
+            const paymentMethod = document.getElementById('payment-method').value;
+            const notes = document.getElementById('purchase-notes').value;
+            const slipFile = document.getElementById('payment-slip').files[0];
+            const isOnline = paymentMethod === 'ONLINE';
+            const requiresSlip = paymentMethodRequiresSlip(paymentMethod);
+
+            if (requiresSlip && !slipFile) {
+                showToast('Please upload a payment slip for this payment method', 'error');
+                return;
+            }
+
+            try {
+                const formData = new FormData();
+                formData.append('itemId', product.id);
+                formData.append('quantity', quantity);
+                formData.append('paymentMethod', paymentMethod);
+                formData.append('notes', notes || '');
+                if (requiresSlip && slipFile) {
+                    formData.append('slip', slipFile);
+                }
+
+                const response = await fetch('/api/user/shop/purchase/request', {
+                    method: 'POST',
+                    body: formData
+                });
+
+                const result = await safeParseApiResponse(response);
+
+                if (result.status === 201) {
+                    if (isOnline) {
+                        const purchaseId = result.data && result.data.id;
+                        if (!purchaseId) {
+                            showToast('Purchase created, but payment session was not initialized. Please try again.', 'error');
+                            return;
+                        }
+
+                        const portalPayload = getPortalPayload();
+                        const portalError = validatePortalPayload(portalPayload);
+                        if (portalError) {
+                            showToast(portalError, 'error');
+                            return;
+                        }
+
+                        const payResponse = await fetch(`/api/user/shop/purchases/${purchaseId}/portal/pay`, {
+                            method: 'POST',
+                            headers: { 'Content-Type': 'application/json' },
+                            body: JSON.stringify(portalPayload)
+                        });
+                        const payResult = await safeParseApiResponse(payResponse);
+                        if (payResult.status !== 200) {
+                            showToast(payResult.message || 'Online payment failed', 'error');
+                            return;
+                        }
+                    }
+
+                    showToast('Order submitted successfully! Admin will review payment and process shipping.', 'success');
+                    $('#purchaseModal').modal('hide');
+                    loadProducts();
+                    loadRecentOrders();
+                    pendingPurchase = null;
+                } else {
+                    showToast(result.message || 'Purchase failed', 'error');
+                }
+            } catch (error) {
+                console.error('Error:', error);
+                showToast('Error processing purchase', 'error');
+            }
+        }
+
+        async function safeParseApiResponse(response) {
+            const contentType = response.headers.get('content-type') || '';
+            if (contentType.includes('application/json')) {
+                return await response.json();
+            }
+
+            const text = await response.text();
+            return {
+                status: response.status,
+                message: text && text.trim().length > 0 ? text : 'Unexpected server response'
+            };
+        }
+
+        function setupEventListeners() {
+            // Category Filter
+            document.querySelectorAll('.category-btn').forEach(btn => {
+                btn.addEventListener('click', function() {
+                    document.querySelectorAll('.category-btn').forEach(b => b.classList.remove('active'));
+                    this.classList.add('active');
+                    currentCategory = this.dataset.category;
+                    renderProducts();
+                });
+            });
+
+            // Search
+            document.getElementById('search-input').addEventListener('input', debounce(renderProducts, 300));
+
+            // Confirm Purchase Button
+            document.getElementById('confirm-purchase-btn').addEventListener('click', confirmPurchase);
+            document.getElementById('portal-card-number').addEventListener('input', function () {
+                const digits = this.value.replace(/\D/g, '').slice(0, 19);
+                this.value = digits.replace(/(.{4})/g, '$1 ').trim();
+            });
+            document.getElementById('portal-cvv').addEventListener('input', function () {
+                this.value = this.value.replace(/\D/g, '').slice(0, 4);
+            });
+        }
+
+        function togglePaymentInputs() {
+            const method = document.getElementById('payment-method').value;
+            const isOnline = method === 'ONLINE';
+            const showBankDetails = method === 'BANK_TRANSFER';
+            const requiresSlip = paymentMethodRequiresSlip(method);
+
+            document.getElementById('online-portal-group').style.display = isOnline ? 'block' : 'none';
+            document.getElementById('slip-upload-group').style.display = requiresSlip ? 'block' : 'none';
+            document.getElementById('bank-details-info').style.display = showBankDetails ? 'block' : 'none';
+        }
+
+        function getPortalPayload() {
+            return {
+                cardHolderName: document.getElementById('portal-card-holder').value.trim(),
+                cardNumber: document.getElementById('portal-card-number').value.trim(),
+                expiryMonth: Number(document.getElementById('portal-exp-month').value),
+                expiryYear: Number(document.getElementById('portal-exp-year').value),
+                cvv: document.getElementById('portal-cvv').value.trim(),
+                billingEmail: document.getElementById('portal-billing-email').value.trim(),
+                acceptedTerms: document.getElementById('portal-accepted-terms').checked
+            };
+        }
+
+        function validatePortalPayload(payload) {
+            if (!payload.cardHolderName || payload.cardHolderName.length < 3) return 'Card holder name is too short';
+            if (!/^[0-9\s]{13,23}$/.test(payload.cardNumber)) return 'Card number format is invalid';
+            if (!payload.expiryMonth || payload.expiryMonth < 1 || payload.expiryMonth > 12) return 'Invalid expiry month';
+            if (!payload.expiryYear || payload.expiryYear < new Date().getFullYear()) return 'Invalid expiry year';
+            if (!/^\d{3,4}$/.test(payload.cvv)) return 'CVV must be 3 or 4 digits';
+            if (!payload.billingEmail || !payload.billingEmail.includes('@')) return 'Invalid billing email';
+            if (!payload.acceptedTerms) return 'You must accept terms and conditions';
+            return null;
+        }
+
+        function truncate(str, maxLength) {
+            if (!str) return '';
+            return str.length > maxLength ? str.substring(0, maxLength) + '...' : str;
+        }
+
+        function formatDate(dateStr) {
+            if (!dateStr) return '-';
+            const date = new Date(dateStr);
+            return date.toLocaleDateString('en-US', { month: 'short', day: 'numeric' });
+        }
+
+        function showToast(message, type = 'success') {
+            const toast = document.createElement('div');
+            toast.style.cssText = `
+                position: fixed; top: 20px; right: 20px; padding: 15px 25px;
+                border-radius: 10px; z-index: 9999; animation: slideIn 0.3s ease;
+                background: ${type === 'success' ? '#4caf50' : '#f44336'}; color: white;
+                box-shadow: 0 5px 20px rgba(0,0,0,0.3); font-weight: 500;
+            `;
+            toast.textContent = message;
+            document.body.appendChild(toast);
+            setTimeout(() => toast.remove(), 4000);
+        }
+
+        function showError(message) {
+            document.getElementById('products-container').innerHTML =
+                `<div class="col-12 empty-state"><p class="text-danger">${message}</p></div>`;
+        }
+
+        function debounce(func, wait) {
+            let timeout;
+            return function(...args) {
+                clearTimeout(timeout);
+                timeout = setTimeout(() => func(...args), wait);
+            };
+        }
+    </script>
+</body>
+</html>
