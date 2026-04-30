@@ -1,0 +1,418 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org" xmlns:sec="http://www.thymeleaf.org/extras/spring-security">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Shop Orders - Gym Management System</title>
+    <th:block th:replace="fragments/dashboard :: css"></th:block>
+    <link rel="stylesheet" th:href="@{/css/api-service.css}">
+    <style>
+        .order-card {
+            background: var(--card-bg);
+            border-radius: 12px;
+            padding: 20px;
+            margin-bottom: 15px;
+            border: 1px solid rgba(255, 255, 255, 0.1);
+        }
+        .status-badge {
+            padding: 5px 12px;
+            border-radius: 20px;
+            font-size: 12px;
+            font-weight: 500;
+        }
+        .status-badge.pending { background: rgba(255, 193, 7, 0.2); color: #ffc107; }
+        .status-badge.processing { background: rgba(33, 150, 243, 0.2); color: #2196f3; }
+        .status-badge.ready { background: rgba(156, 39, 176, 0.2); color: #9c27b0; }
+        .status-badge.delivered { background: rgba(76, 175, 80, 0.2); color: #4caf50; }
+        .status-badge.cancelled { background: rgba(244, 67, 54, 0.2); color: #f44336; }
+        .status-badge.completed { background: rgba(76, 175, 80, 0.2); color: #4caf50; }
+        .status-badge.refunded { background: rgba(158, 158, 158, 0.2); color: #9e9e9e; }
+        .status-badge.pending_approval { background: rgba(255, 193, 7, 0.2); color: #ffc107; }
+        .status-badge.awaiting_portal_payment { background: rgba(33, 150, 243, 0.2); color: #2196f3; }
+        .status-badge.failed { background: rgba(244, 67, 54, 0.2); color: #f44336; }
+
+        .stats-row {
+            display: flex;
+            gap: 20px;
+            margin-bottom: 25px;
+        }
+        .stat-box {
+            background: var(--card-bg);
+            border-radius: 12px;
+            padding: 20px;
+            flex: 1;
+            text-align: center;
+        }
+        .stat-box h3 { font-size: 28px; margin: 0; color: #f4511e; }
+        .stat-box p { margin: 5px 0 0; color: var(--text-muted); }
+
+        .filter-tabs {
+            display: flex;
+            gap: 10px;
+            margin-bottom: 20px;
+            flex-wrap: wrap;
+        }
+        .filter-tab {
+            padding: 8px 20px;
+            background: rgba(255, 255, 255, 0.05);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            border-radius: 20px;
+            color: var(--text-muted);
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+        .filter-tab:hover { background: rgba(244, 81, 30, 0.1); }
+        .filter-tab.active {
+            background: #f4511e;
+            color: white;
+            border-color: #f4511e;
+        }
+
+        .order-actions button {
+            padding: 6px 15px;
+            margin-right: 5px;
+            border-radius: 6px;
+            border: none;
+            cursor: pointer;
+            font-size: 13px;
+        }
+        .btn-process { background: #2196f3; color: white; }
+        .btn-ready { background: #9c27b0; color: white; }
+        .btn-deliver { background: #4caf50; color: white; }
+        .btn-cancel { background: #f44336; color: white; }
+    </style>
+</head>
+
+<body>
+    <div id="loading-overlay" style="display: none;">
+        <div style="text-align: center;">
+            <div class="loading-spinner"></div>
+            <div class="loading-text" style="color: white; margin-top: 15px;">Loading...</div>
+        </div>
+    </div>
+
+    <div class="dashboard-wrapper">
+        <nav th:replace="fragments/dashboard :: sidebar(activePage='orders')"></nav>
+
+        <div class="main-content">
+            <div class="container-fluid">
+                <div th:replace="fragments/dashboard :: header(title='Shop Orders')"></div>
+
+                <!-- Stats -->
+                <div class="stats-row">
+                    <div class="stat-box">
+                        <h3 id="stat-total">0</h3>
+                        <p>Total Orders</p>
+                    </div>
+                    <div class="stat-box">
+                        <h3 id="stat-pending">0</h3>
+                        <p>Pending</p>
+                    </div>
+                    <div class="stat-box">
+                        <h3 id="stat-today-revenue">$0</h3>
+                        <p>Today's Revenue</p>
+                    </div>
+                    <div class="stat-box">
+                        <h3 id="stat-monthly-revenue">$0</h3>
+                        <p>Monthly Revenue</p>
+                    </div>
+                </div>
+
+                <!-- Orders Section -->
+                <div class="form-card">
+                    <div class="d-flex justify-content-between align-items-center mb-4">
+                        <h2>📦 Orders</h2>
+                    </div>
+
+                    <!-- Filter Tabs -->
+                    <div class="filter-tabs">
+                        <div class="filter-tab active" data-filter="all">All Orders</div>
+                        <div class="filter-tab" data-filter="PENDING">⏳ Pending</div>
+                        <div class="filter-tab" data-filter="PROCESSING">🔄 Processing</div>
+                        <div class="filter-tab" data-filter="READY">✅ Ready</div>
+                        <div class="filter-tab" data-filter="DELIVERED">🎉 Delivered</div>
+                        <div class="filter-tab" data-filter="CANCELLED">❌ Cancelled</div>
+                    </div>
+
+                    <!-- Orders Table -->
+                    <div class="table-responsive">
+                        <table class="table table-hover custom-table">
+                            <thead>
+                                <tr>
+                                    <th>Order #</th>
+                                    <th>Customer</th>
+                                    <th>Item</th>
+                                    <th>Qty</th>
+                                    <th>Total</th>
+                                    <th>Payment</th>
+                                    <th>Status</th>
+                                    <th>Date</th>
+                                    <th>Actions</th>
+                                </tr>
+                            </thead>
+                            <tbody id="orders-tbody">
+                                <tr>
+                                    <td colspan="9" class="text-center">Loading orders...</td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <th:block th:replace="fragments/dashboard :: scripts"></th:block>
+    <script>
+        let allOrders = [];
+        let currentFilter = 'all';
+
+        document.addEventListener('DOMContentLoaded', function() {
+            loadOrders();
+            loadStats();
+            setupFilters();
+            document.getElementById('loading-overlay').style.display = 'none';
+        });
+
+        async function loadStats() {
+            try {
+                const response = await fetch('/api/admin/inventory/stats');
+                const result = await response.json();
+                if (result.status === 200) {
+                    const stats = result.data;
+                    document.getElementById('stat-total').textContent = stats.totalPurchases || 0;
+                    document.getElementById('stat-pending').textContent = stats.pendingOrders || 0;
+                    document.getElementById('stat-today-revenue').textContent = '$' + (stats.todaysRevenue || 0).toFixed(2);
+                    document.getElementById('stat-monthly-revenue').textContent = '$' + (stats.monthlyRevenue || 0).toFixed(2);
+                }
+            } catch (error) {
+                console.error('Error loading stats:', error);
+            }
+        }
+
+        async function loadOrders() {
+            try {
+                const response = await fetch('/api/admin/inventory/orders');
+                const result = await response.json();
+                if (result.status === 200) {
+                    allOrders = result.data || [];
+                    renderOrders();
+                }
+            } catch (error) {
+                console.error('Error loading orders:', error);
+                document.getElementById('orders-tbody').innerHTML =
+                    '<tr><td colspan="9" class="text-center text-danger">Error loading orders</td></tr>';
+            }
+        }
+
+        function renderOrders() {
+            const tbody = document.getElementById('orders-tbody');
+            let filtered = allOrders;
+
+            if (currentFilter !== 'all') {
+                filtered = allOrders.filter(o => o.fulfillmentStatus === currentFilter);
+            }
+
+            if (filtered.length === 0) {
+                tbody.innerHTML = '<tr><td colspan="9" class="text-center text-muted">No orders found</td></tr>';
+                return;
+            }
+
+            tbody.innerHTML = filtered.map(order => `
+                <tr>
+                    <td>#${order.id}</td>
+                    <td>
+                        <strong>${order.userName}</strong><br>
+                        <small class="text-muted">${order.userEmail}</small>
+                    </td>
+                    <td>
+                        ${order.itemName}<br>
+                        <small class="text-muted">${order.itemCategory}</small>
+                    </td>
+                    <td>${order.quantity}</td>
+                    <td><strong>$${order.totalPrice.toFixed(2)}</strong></td>
+                    <td>
+                        <span class="status-badge ${order.paymentStatus.toLowerCase()}">${order.paymentStatus}</span>
+                    </td>
+                    <td>
+                        <span class="status-badge ${order.fulfillmentStatus.toLowerCase()}">${order.fulfillmentStatus}</span>
+                    </td>
+                    <td>${formatDate(order.purchaseDate)}</td>
+                    <td class="order-actions">
+                        ${getActionButtons(order)}
+                    </td>
+                </tr>
+            `).join('');
+        }
+
+        function getActionButtons(order) {
+            const status = order.fulfillmentStatus;
+            if (status === 'DELIVERED' || status === 'CANCELLED') {
+                return '<span class="text-muted">-</span>';
+            }
+
+            if (order.paymentStatus === 'AWAITING_PORTAL_PAYMENT') {
+                return '<span class="text-muted">Waiting member payment</span>';
+            }
+
+            if (order.paymentStatus === 'PENDING_APPROVAL') {
+                let reviewButtons = `<button class="btn-process" onclick="approvePayment(${order.id})">Approve Payment</button>`;
+                reviewButtons += `<button class="btn-cancel" onclick="rejectPayment(${order.id})">Reject Payment</button>`;
+                if (order.paymentMethod !== 'ONLINE') {
+                    reviewButtons += `<button class="btn-ready" onclick="viewSlip(${order.id})">View Slip</button>`;
+                }
+                return reviewButtons;
+            }
+
+            if (order.paymentStatus !== 'COMPLETED') {
+                return '<span class="text-muted">Payment not approved</span>';
+            }
+
+            let buttons = '';
+            if (status === 'PENDING' || status === 'PROCESSING') {
+                buttons += `<button class="btn-ready" onclick="shipOrder(${order.id})">Ship</button>`;
+            }
+            if (status === 'READY') {
+                buttons += `<button class="btn-deliver" onclick="updateStatus(${order.id}, 'DELIVERED')">Deliver</button>`;
+            }
+            if (status !== 'DELIVERED') {
+                buttons += `<button class="btn-cancel" onclick="cancelOrder(${order.id})">Cancel</button>`;
+            }
+            return buttons;
+        }
+
+        async function approvePayment(orderId) {
+            try {
+                const response = await fetch(`/api/admin/inventory/orders/${orderId}/approve-payment`, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ notes: 'Approved by admin' })
+                });
+                const result = await response.json();
+                if (result.status === 200) {
+                    showToast('Payment approved. Order moved to processing.', 'success');
+                    loadOrders();
+                    loadStats();
+                } else {
+                    showToast(result.message || 'Failed to approve payment', 'error');
+                }
+            } catch (error) {
+                showToast('Error approving payment', 'error');
+            }
+        }
+
+        async function rejectPayment(orderId) {
+            const notes = prompt('Rejection reason (optional):') || '';
+            try {
+                const response = await fetch(`/api/admin/inventory/orders/${orderId}/reject-payment`, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ notes })
+                });
+                const result = await response.json();
+                if (result.status === 200) {
+                    showToast('Payment rejected', 'success');
+                    loadOrders();
+                } else {
+                    showToast(result.message || 'Failed to reject payment', 'error');
+                }
+            } catch (error) {
+                showToast('Error rejecting payment', 'error');
+            }
+        }
+
+        function viewSlip(orderId) {
+            window.open(`/api/admin/inventory/orders/${orderId}/slip`, '_blank');
+        }
+
+        async function shipOrder(orderId) {
+            try {
+                const response = await fetch(`/api/admin/inventory/orders/${orderId}/ship`, { method: 'POST' });
+                const result = await response.json();
+                if (result.status === 200) {
+                    showToast('Order marked as shipped', 'success');
+                    loadOrders();
+                } else {
+                    showToast(result.message || 'Failed to mark as shipped', 'error');
+                }
+            } catch (error) {
+                showToast('Error shipping order', 'error');
+            }
+        }
+
+        async function updateStatus(orderId, status) {
+            try {
+                const response = await fetch(`/api/admin/inventory/orders/${orderId}/status?status=${status}`, {
+                    method: 'PATCH'
+                });
+                const result = await response.json();
+                if (result.status === 200) {
+                    showToast('Order status updated!', 'success');
+                    loadOrders();
+                    loadStats();
+                } else {
+                    showToast(result.message || 'Failed to update status', 'error');
+                }
+            } catch (error) {
+                console.error('Error:', error);
+                showToast('Error updating status', 'error');
+            }
+        }
+
+        async function cancelOrder(orderId) {
+            if (!confirm('Are you sure you want to cancel this order? Stock will be restored.')) return;
+
+            try {
+                const response = await fetch(`/api/admin/inventory/orders/${orderId}/cancel`, {
+                    method: 'POST'
+                });
+                const result = await response.json();
+                if (result.status === 200) {
+                    showToast('Order cancelled and stock restored!', 'success');
+                    loadOrders();
+                    loadStats();
+                } else {
+                    showToast(result.message || 'Failed to cancel order', 'error');
+                }
+            } catch (error) {
+                console.error('Error:', error);
+                showToast('Error cancelling order', 'error');
+            }
+        }
+
+        function setupFilters() {
+            document.querySelectorAll('.filter-tab').forEach(tab => {
+                tab.addEventListener('click', function() {
+                    document.querySelectorAll('.filter-tab').forEach(t => t.classList.remove('active'));
+                    this.classList.add('active');
+                    currentFilter = this.dataset.filter;
+                    renderOrders();
+                });
+            });
+        }
+
+        function formatDate(dateStr) {
+            if (!dateStr) return '-';
+            const date = new Date(dateStr);
+            return date.toLocaleDateString('en-US', {
+                month: 'short', day: 'numeric', year: 'numeric',
+                hour: '2-digit', minute: '2-digit'
+            });
+        }
+
+        function showToast(message, type = 'success') {
+            const toast = document.createElement('div');
+            toast.className = `toast-notification ${type}`;
+            toast.textContent = message;
+            toast.style.cssText = `
+                position: fixed; top: 20px; right: 20px; padding: 15px 25px;
+                border-radius: 8px; z-index: 9999; animation: slideIn 0.3s ease;
+                background: ${type === 'success' ? '#4caf50' : '#f44336'}; color: white;
+            `;
+            document.body.appendChild(toast);
+            setTimeout(() => toast.remove(), 3000);
+        }
+    </script>
+</body>
+</html>
